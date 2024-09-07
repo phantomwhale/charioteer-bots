@@ -33,7 +33,7 @@ loop do
   rolls = Array.new(NUMBER_OF_BOTS) { roll_movement }
 
   rows = rolls.each_with_index.map do |move, index|
-    [index, move.movement, move.corner?, move.attack?, move.boost?]
+    [index + 1, move.movement, move.corner?, move.attack?, move.boost?]
   end
 
   puts Terminal::Table.new(headings: %w[Position Movement Corner Attack Boost], rows: rows)
