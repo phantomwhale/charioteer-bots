@@ -4,24 +4,17 @@
 #
 require 'securerandom'
 require 'terminal-table'
+require 'io/console'
 
 NUMBER_OF_BOTS = 5
 
 Move = Data.define(:movement, :black, :red, :boost) do
-  def corner?
-    black ? "Corner" : nil
-  end
-
-  def attack?
-    red ? "ATTACK" : nil
-  end
-
-  def boost?
-    boost == 0 ? "-" : "+#{boost}"
-  end
+  def corner? = black ? "Corner" : nil
+  def attack? = red ? "ATTACK" : nil
+  def boost? = boost.zero? ? "-" : "+#{boost}"
 end
 
-def roll_movement(first: false, last: false)
+def roll_movement
   black_die = SecureRandom.random_number(1..6)
   red_die = SecureRandom.random_number(1..6)
   boost_die = SecureRandom.random_number(1..6)
@@ -33,8 +26,20 @@ def roll_movement(first: false, last: false)
   red_movement = (1 + red_die) / 2
   boost = boost_die >= 5 ? 3 : 0
 
-  Move.new(movement: 4 + black_movement + red_movement, black:, red:, boost:)
+  Move.new(movement: 4 + black_movement + red_movement, black: black, red: red, boost: boost)
 end
 
-rows = NUMBER_OF_BOTS.times.map { roll_movement }.each_with_index.map { |move, index| [index, move.movement, move.corner?, move.attack?, move.boost?]  }
-puts Terminal::Table.new :headings => ['Position', 'Movement', 'Corner', 'Attack', 'Boost'], rows:
+loop do
+  rolls = Array.new(NUMBER_OF_BOTS) { roll_movement }
+
+  rows = rolls.each_with_index.map do |move, index|
+    [index, move.movement, move.corner?, move.attack?, move.boost?]
+  end
+
+  puts Terminal::Table.new(headings: %w[Position Movement Corner Attack Boost], rows: rows)
+  puts
+  print "Press any key to roll again, or q to quit >"
+  break if $stdin.getch == "q"
+
+  puts
+end
